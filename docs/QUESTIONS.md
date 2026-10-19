@@ -32,3 +32,32 @@ Status key: **Open** means I picked a default but would like your answer. **Sett
 
 ### 7. What are the remittance split percentages?
 **Open.** I seeded a placeholder split of Parish 50%, Area 10%, Zone 10%, Province 10% and National 20%. Please send the real figures. A different split can be set for a region, province or zone if they differ.
+
+## Headcount (ushers)
+
+### 8. How do we know a first-timer came back?
+**Open.** **Decided:** ushers have a "Mark a returning guest present" button on the counting screen. They search by name or phone and tap "Mark present". Staff can also mark attendance from a member's profile. The 30-day "became a regular" rule counts these check-ins. If nobody marks returning guests, everyone will look like they didn't come back, so ushers need to be told about this button.
+
+### 9. Does the first visit count towards the 3 visits in 30 days?
+**Open.** **Decided:** yes. Three visits means the first visit plus two returns within 30 days.
+
+### 10. Can an usher count a zone they weren't rostered to?
+**Open.** **Decided:** yes. The roster only shows a "On your roster" badge. Counts from every usher in a zone add together.
+
+### 11. How late can an usher's phone still send counts?
+**Open.** **Decided:** up to 7 days after the service, so a phone that was offline over the weekend still sends. After that the Head Usher types the numbers on the report.
+
+### 12. What if an usher's counts arrive after the report was submitted?
+**Open.** **Decided:** the counts are stored but don't change the submitted report. The report shows a note that new counts arrived. The Head Usher or Pastor can reopen the report to include them.
+
+### 13. Who counts as "on duty" for the workers-absent figure?
+**Open.** **Decided:** an usher on the roster becomes "on duty" the moment their first count reaches the server. Rostered ushers who never counted are shown as absent.
+
+### 14. A first-timer gives a phone number someone else already uses. What then?
+**Open.** **Decided:** the app warns and offers two buttons. "It's them" marks the existing person present instead of creating a new record. "Different person" saves a new record, because families often share a phone. When offline, the app can't check, so it saves and the Secretary can merge duplicates later in Members.
+
+### 15. Should the "happy to be contacted" box be ticked by default?
+**Open.** **Decided:** no. The usher has to tick it after asking. Nigeria's data protection law expects a clear yes. Without it, the person gets no welcome or invitation messages, but they still get a follow-up call task and can still become a regular member.
+
+### 16. Who can add an extra or special service on the day?
+**Open.** **Decided:** the Head Usher or Parish Pastor, from the Count screen. A service can only run more times in one day than its parish setting allows if someone raises that setting first.

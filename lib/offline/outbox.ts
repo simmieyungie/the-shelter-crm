@@ -5,34 +5,68 @@ function uuid(): string {
   return crypto.randomUUID();
 }
 
-/** Writes the tally locally and replaces any pending outbox item for the same row. */
-export async function saveTally(tally: Omit<LocalTally, "clientUpdatedAt">) {
+export type TallyIdentity = { key: string; userId: string; serviceEventId: string; sanctuaryZoneId: string };
+type Counts = Pick<LocalTally, "men" | "women" | "children" | "firstTimers">;
+
+/**
+ * Reads, changes and writes the local tally in one transaction (so fast taps never
+ * lose each other), then replaces any pending outbox item for the same row.
+ */
+export async function updateTally(id: TallyIdentity, mutate: (t: LocalTally) => Partial<LocalTally>): Promise<LocalTally> {
   const db = offlineDb();
-  const clientUpdatedAt = new Date().toISOString();
-  const row: LocalTally = { ...tally, clientUpdatedAt };
-  const payload = {
-    serviceEventId: row.serviceEventId,
-    sanctuaryZoneId: row.sanctuaryZoneId,
-    men: row.men,
-    women: row.women,
-    children: row.children,
-    firstTimers: row.firstTimers,
-    clientUpdatedAt,
-  };
+  let saved!: LocalTally;
   await db.transaction("rw", db.tallies, db.outbox, async () => {
-    await db.tallies.put(row);
-    const existing = await db.outbox.where("key").equals(row.key).first();
-    if (existing && existing.status === "pending") {
-      await db.outbox.update(existing.seq!, {
-        payload,
-        version: existing.version + 1,
-        nextAttemptAt: Date.now(),
-      });
+    const current: LocalTally =
+      (await db.tallies.get(id.key)) ?? {
+        ...id,
+        clientId: uuid(),
+        men: 0,
+        women: 0,
+        children: 0,
+        firstTimers: 0,
+        registeredFirstTimers: 0,
+        clientUpdatedAt: new Date(0).toISOString(),
+      };
+    const patch = mutate(current);
+    const next: LocalTally = { ...current, ...patch };
+    for (const k of ["men", "women", "children", "firstTimers", "registeredFirstTimers"] as const) next[k] = Math.max(0, Math.min(100_000, Math.round(next[k])));
+    const countsChanged = (["men", "women", "children", "firstTimers"] as const).some((k) => next[k] !== current[k]);
+    if (countsChanged) {
+      // Strictly increasing timestamps so last-write-wins never ties.
+      const prev = Date.parse(current.clientUpdatedAt);
+      next.clientUpdatedAt = new Date(Math.max(Date.now(), prev + 1)).toISOString();
+    }
+    await db.tallies.put(next);
+    saved = next;
+    if (!countsChanged) return;
+    const payload = {
+      serviceEventId: next.serviceEventId,
+      sanctuaryZoneId: next.sanctuaryZoneId,
+      men: next.men,
+      women: next.women,
+      children: next.children,
+      firstTimers: next.firstTimers,
+      clientUpdatedAt: next.clientUpdatedAt,
+    };
+    const existing = await db.outbox.where("key").equals(next.key).filter((i) => i.status === "pending").first();
+    if (existing) {
+      await db.outbox.update(existing.seq!, { payload, version: existing.version + 1, nextAttemptAt: Date.now(), attempts: 0 });
     } else {
-      await db.outbox.add(newItem("tally.upsert", row.clientId, row.key, payload));
+      await db.outbox.add(newItem("tally.upsert", next.clientId, next.key, payload));
     }
   });
   requestSync();
+  return saved;
+}
+
+/** Restores a tally from the server copy when this device has nothing newer. */
+export async function restoreTally(id: TallyIdentity, server: Counts & { clientId: string; clientUpdatedAt: string }) {
+  const db = offlineDb();
+  await db.transaction("rw", db.tallies, async () => {
+    const local = await db.tallies.get(id.key);
+    if (local && Date.parse(local.clientUpdatedAt) >= Date.parse(server.clientUpdatedAt)) return;
+    await db.tallies.put({ ...id, ...server, registeredFirstTimers: local?.registeredFirstTimers ?? 0 });
+  });
 }
 
 export async function enqueueMemberCreate(payload: MemberCreatePayload, label: string) {
