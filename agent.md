@@ -131,14 +131,20 @@ small_groups    (id, parish_id, type_name default 'Tribe', name, address, landma
 small_group_memberships (id, small_group_id, member_id, joined_on, is_active, UNIQUE(small_group_id, member_id))
 
 recurrence enum: WEEKLY, MONTHLY_FIRST_FRIDAY, SPECIAL
-service_types (id, parish_id, name, day_of_week int NULL, start_time time, recurrence, is_active, UNIQUE(parish_id, name))
+service_types (id, parish_id, name, day_of_week int NULL, start_time time, recurrence, is_active,
+               max_per_day smallint NOT NULL default 1 CHECK (max_per_day >= 1),  -- parish-configured, see 5.5
+               UNIQUE(parish_id, name))
 ```
 
 ### 5.5 Services, tallies, reports
 ```sql
 service_events (id, parish_id, service_type_id, event_date date, start_time time,
+                occurrence smallint NOT NULL default 1,               -- 1st, 2nd… run of this type that day
                 preacher text NULL, theme text NULL,
-                UNIQUE(parish_id, service_type_id, event_date))      -- also the import de-dupe key
+                UNIQUE(parish_id, service_type_id, event_date, occurrence))  -- also the import de-dupe key
+```
+Multiple services of the same type on one day are **configurable per parish, per service type**, via `service_types.max_per_day` (admin screen: "How many times can this service hold on one day?"). The server rejects `occurrence > max_per_day`. When `max_per_day = 1` the app never shows occurrence anywhere; when it is >1, pickers and labels show "{service} · 2nd" and the start time. Lowering `max_per_day` is blocked if existing events use a higher occurrence.
+```sql
 
 usher_assignments (id, service_event_id, sanctuary_zone_id, user_id, is_lead, checked_in_at NULL,
                    UNIQUE(service_event_id, user_id))
@@ -254,7 +260,8 @@ audit_log (id, actor_user_id, entity text, entity_id uuid, action text, before j
 
 ### 7.3 Add past service (manual backlog)
 - From Reports → "Add past service". Pick date + service type (+ optional preacher). Attendance fields are typed in (blank = unknown, placeholder "0"). `source = MANUAL`, status DRAFT → SUBMITTED. The pastor verifies like any report.
-- If a `service_event` already exists for (parish, type, date), open that report instead of creating a duplicate.
+- **Any past date can be backfilled**, Sunday or midweek. There is no fixed backfill start date. The date picker highlights dates that match the service type's schedule and have **no VERIFIED report**, and allows any other past date too (SPECIAL types take any date). Future dates are not allowed.
+- If a `service_event` already exists for (parish, type, date, occurrence), open that report instead of creating a duplicate. If it is already VERIFIED, show it read-only with the normal reopen rules. If the type allows more than one per day and all existing occurrences are taken, offer "Add another {service} on this date" up to `max_per_day`.
 
 ### 7.4 Spreadsheet import (4 steps, `/reports/import`)
 1. **Upload**: .xlsx/.xls/.csv up to 10 MB. Server parses with SheetJS, lists sheets, and the user picks one. Store the batch + raw rows (`import_rows.raw`). Offer a "Download a blank template" CSV with the canonical headers.
@@ -265,7 +272,8 @@ audit_log (id, actor_user_id, entity text, entity_id uuid, action text, before j
    - Blank count → leave blank (unknown), the default, or import as 0
    - Unknown service name → map to an existing service type or skip
    - Total column present and ≠ men+women+children → keep components or skip
-   - Duplicate of an existing service_event → always skipped (never overwrite)
+   - Duplicate of an existing service_event (same type, date and occurrence) → always skipped (never overwrite)
+   - Several rows with the same service type + date: if the type's `max_per_day` allows it, assign occurrences by a mapped `Time` column, else by row order, and show the assignment for confirmation; if there are more rows than `max_per_day`, flag "Need a fix" (skip extras or raise the limit in admin)
    Choose after-import status: "Imported · needs pastor check", the default, or "Verified now" (PARISH_PASTOR only).
 4. **Commit** in one DB transaction: create missing `service_events`, insert `service_reports` with `source = IMPORT` and `import_batch_id`. Show "N services imported · {first date} – {last date}".
    **Undo this import**: delete reports (and service_events created by) that batch, provided none of them was edited after import. If some were edited, list them and require confirmation. Mark the batch UNDONE. Writes to audit_log.
@@ -323,7 +331,7 @@ Fonts: **Inter** (UI), **JetBrains Mono** (all counts, money, codes). 8-pt spaci
 2. **Count › Tally**: back button + zone/service title; big "Your count" (mono 52 px) and "Zone so far"; rows for Men / Women / Children with **−, +1, +5** (48 px tall buttons, +1 is solid brand); First-timers row with − / +1 and the hint "already counted above"; "Register first-timer details · N to go" button; "Review & submit headcount".
 3. **Count › First-timer**: segmented control "Scan guest card | Type details" (scan disabled in v1); full name*, phone* with +234 prefix (mono), "Same number on WhatsApp" checkbox, gender radios, nearest Tribe select, consent checkbox; "Save & add another" / "Save & finish".
 4. **Tasks**: title + "{service} · N overdue"; department filter; "New task". Desktop: 4-column board (To do / In progress / For review / Done) with drag-and-drop (dnd-kit). Phone: horizontal status chips ("To do · 3") showing one column's cards, with status changed from the card menu. Cards: priority pill (Urgent = solid red), department pill, title, assignee, due. Overdue cards get a red border and red bold due text.
-5. **Reports list**: "Import spreadsheet" (outline) + "Add past service" (solid); dashed **backlog banner**: "N past services have no record" with "Import now". Rows: date, service, attendance (mono), collections (mono), status pill: Draft (amber) / Verified (green) / No record · add (red) / Imported · check (brand tint). "No record" rows are generated from service_types × dates since the parish's go-live/backfill start date. Rows wrap to stacked cards on phone.
+5. **Reports list**: "Import spreadsheet" (outline) + "Add past service" (solid); dashed **backlog banner**: "N past services have no record" with "Import now". Rows: date, service, attendance (mono), collections (mono), status pill: Draft (amber) / Verified (green) / No record · add (red) / Imported · check (brand tint). "No record" rows are generated from active service_types × their scheduled dates **within the date range the user picks** (filter at the top of the list; default the last 12 weeks; any past range allowed). A date counts as a gap when it has no VERIFIED report; dates with a draft or unverified report show that report's pill instead. Clicking "No record · add" opens Add past service prefilled with that date and type. Rows wrap to stacked cards on phone.
 6. **Service report** (live or past): back + title "{service} · {date}" + status pill; **Service** card (date, service type, preacher), with a note on past records: "Past records don't need usher tallies. The pastor still signs off before they count in zone totals."; **Attendance** card (5 numeric inputs + total row; caption "Prefilled from N usher tallies" or "Type the numbers from your records"); **Collections** card (₦-prefixed mono inputs, live total, notes); **Sign-off** aside (tracker, verifying pastor, "Submit for verification", "Save draft"); remittance preview aside with split shown from policy.
 7. **Import wizard**: 4-segment progress bar (Upload · Match columns · Review · Done) and the screens described in §7.4.
 8. **Zone overview**: KPI tiles (auto-fit grid, 2-up on phone), 8-week bar chart, "Needs attention" list, compliance table on desktop / parish cards on phone (name, area · attendance, overall pill, three mini status cells).
@@ -340,7 +348,7 @@ Fonts: **Inter** (UI), **JetBrains Mono** (all counts, money, codes). 8-pt spaci
 
 ## 9. Seed data
 
-`pnpm db:seed` creates: 1 region, 1 province, 1 zone ("Lagos Zone 4"), 3 areas, 6 parishes; for the first parish: 4 sanctuary zones (Main Floor – Center 320, Gallery – Left 140, Gallery – Right 140, Children's Church 90), service types (Sunday 1st Service 08:00, Sunday 2nd Service 10:30, Accelerate Tue 18:30), 6 departments, 2 tribes, 40 members, 8 weeks of verified reports, one draft, one missing week; users for each role with password `password123` (dev only). Also put a sample messy spreadsheet in `tests/fixtures/imports/` for manual testing of the importer.
+`pnpm db:seed` creates: 1 region, 1 province, 1 zone ("Lagos Zone 4"), 3 areas, 6 parishes; for the first parish: 4 sanctuary zones (Main Floor – Center 320, Gallery – Left 140, Gallery – Right 140, Children's Church 90), service types (Sunday 1st Service 08:00, Sunday 2nd Service 10:30, Accelerate Tue 18:30), 6 departments, 2 tribes, 40 members, 8 weeks of verified reports, one draft, one missing Sunday and one missing midweek service (older than 8 weeks too, to test backfilling far back), Sunday 2nd Service with `max_per_day = 2`; users for each role with password `password123` (dev only). Also put a sample messy spreadsheet in `tests/fixtures/imports/` for manual testing of the importer.
 
 ## 10. Build order & acceptance criteria
 
@@ -399,7 +407,7 @@ pnpm lint | typecheck | test | test:e2e
 ## 13. Open questions (ask the user; don't guess silently)
 
 1. Remittance split percentages per level, and whether policy differs by province.
-2. Earliest date to backfill from (drives "No record" gaps in the reports list).
+2. ~~Earliest date to backfill from~~ **Decided:** no fixed start date; any past date can be backfilled and gaps show for a user-picked range (§7.3, §8.3).
 3. Which SMS/WhatsApp provider to use when messaging goes live.
-4. Whether a parish can run multiple services of the same type on one day (would change the `service_events` unique key).
+4. ~~Multiple services of the same type on one day~~ **Decided:** configurable per parish per service type via `max_per_day`; `occurrence` is part of the unique key (§5.5).
 5. Hosting target and domain.
