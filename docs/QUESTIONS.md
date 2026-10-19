@@ -100,3 +100,20 @@ Status key: **Open** means I picked a default but would like your answer. **Sett
 
 ### 27. Can an HOD give a task to someone outside their department?
 **Open.** **Decided:** no, as the spec says. They can assign themselves or active members of their department who have an account. The Pastor can assign anyone in the parish.
+
+## Zone overview
+
+### 28. What do "this week / month / quarter" mean, and what is the comparison?
+**Open.** **Decided:** calendar periods up to today, with weeks starting on Sunday. The % change compares with the same number of days of the previous period. So on 20 October, "this month" is compared with 1 to 20 September, not all of September.
+
+### 29. When is a Sunday report "Late" or "Overdue"?
+**Open.** **Decided:** reports are due by the end of Monday. Submitted after that is "Late". Nothing submitted by then is "Overdue". A parish with two Sunday services needs both reports in before it shows "Submitted".
+
+### 30. How is a parish's "Overall" decided?
+**Open.** **Decided:** points are added up. A late report is 1 point and an overdue report is 2. Collections awaiting the pastor are 1 point and collections not logged are 2. Outstanding remittance is 1 point. 0 points is "On track", 1 to 2 is "Watch", and 3 or more is "Follow up".
+
+### 31. Which month does the remittance tile use?
+**Open.** **Decided:** last full month for the week and month views. For the quarter view, a parish counts as cleared only if all of the last three full months are cleared. Part-paid counts as "Outstanding".
+
+### 32. What does "absent" mean on the workers tile?
+**Open.** **Decided:** ushers on the roster for a service in the period, up to yesterday, who never sent a count.
