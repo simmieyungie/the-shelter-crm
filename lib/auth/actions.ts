@@ -43,8 +43,10 @@ export async function loginWithPassword(_prev: LoginState, formData: FormData): 
   const { identifier, password, next } = parsed.data;
 
   const ip = await clientKey();
-  const limited = rateLimit(`login:${ip}`, 10, 60_000);
-  const limitedId = rateLimit(`login-id:${identifier.toLowerCase()}`, 10, 15 * 60_000);
+  // Overridable for automated tests, which sign in many times from one machine.
+  const perMinute = Number(process.env.LOGIN_RATE_LIMIT ?? 10);
+  const limited = rateLimit(`login:${ip}`, perMinute, 60_000);
+  const limitedId = rateLimit(`login-id:${identifier.toLowerCase()}`, perMinute, 15 * 60_000);
   if (!limited.ok || !limitedId.ok) return { error: "Too many attempts. Wait a minute and try again." };
 
   const isEmail = identifier.includes("@");

@@ -1,0 +1,66 @@
+# Production on a single VPS: Postgres, the web app, the job worker, Caddy (HTTPS) and nightly backups.
+# Usage: see docs/DEPLOY.md
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: crm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm"]
+      interval: 5s
+      retries: 20
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://crm:${POSTGRES_PASSWORD}@postgres:5432/crm
+      APP_URL: https://${DOMAIN:?set DOMAIN}
+    command: sh -c "pnpm db:migrate && pnpm start"
+
+  jobs:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://crm:${POSTGRES_PASSWORD}@postgres:5432/crm
+    command: pnpm jobs
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+      - ./deploy/backup.sh:/backup.sh:ro
+    entrypoint: ["sh", "/backup.sh"]
+
+volumes:
+  pgdata:
+  caddy_data:

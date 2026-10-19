@@ -27,3 +27,18 @@ Local Postgres runs on port 5433 to avoid clashing with any other Postgres. Unit
 - `tasks.assigned_by` is nullable for system-created follow-up tasks.
 - `parishes.follow_up_lead_user_id` for Day-3 call tasks.
 - `import_rows.resolution` is `jsonb` (one choice per issue) rather than text.
+
+## 2026-10-20 · Offline items belong to the person who queued them
+Each outbox item on a phone records the user who created it, and the sync loop only sends the signed-in user's items. Without this, on a shared phone usher B could sync usher A's unsent counts under B's name. Signing out warns when items are still waiting, leaves them on the phone and clears cached pages, so the next person can't read the previous user's screens.
+
+## 2026-10-20 · Rate limits
+Sign-in: 10 attempts per minute per IP and per account (configurable with `LOGIN_RATE_LIMIT`; the E2E server raises it). Magic links: 5 per 10 minutes per IP. Sync: 120 batches per minute per user. Imports: 30 uploads per 10 minutes per user. In-memory, single instance.
+
+## 2026-10-20 · pnpm pinned to 10.34.7
+`packageManager` is pinned so local and Docker installs match. pnpm 11 refuses packages younger than 24 hours (`minimumReleaseAge`), which broke the Docker build with a freshly resolved lockfile.
+
+## 2026-10-20 · Deployment shape
+One Docker image runs the web app and the pg-boss worker. `docker-compose.prod.yml` adds Postgres 16, Caddy (automatic HTTPS) and a nightly `pg_dump` container. Migrations run when the web container starts. See docs/DEPLOY.md.
+
+## 2026-10-20 · Not verified by an automated check
+Lighthouse "installable" and the LCP < 2.5 s target on Fast 3G were not run in CI. The manifest, icons, service worker and offline reload are covered by tests. Run Lighthouse against a deployed build before launch.

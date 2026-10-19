@@ -5,6 +5,8 @@ export type OutboxStatus = "pending" | "rejected";
 
 export type OutboxItem = {
   seq?: number;
+  /** Who queued it. Only that user's session may send it (shared phones). */
+  userId: string;
   clientId: string;
   kind: SyncKind;
   /** Local upsert key: one pending tally item per (event, zone, user). */
@@ -50,6 +52,9 @@ class OfflineDb extends Dexie {
       tallies: "&key, userId, serviceEventId",
       cache: "&key",
       zoneTotals: "&key",
+    });
+    this.version(2).stores({
+      outbox: "++seq, &clientId, key, status, kind, nextAttemptAt, userId, [userId+status]",
     });
   }
 }

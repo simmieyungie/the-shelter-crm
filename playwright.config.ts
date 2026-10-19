@@ -31,6 +31,6 @@ export default defineConfig({
     url: `http://localhost:${PORT}/login`,
     timeout: 300_000,
     reuseExistingServer: !process.env.CI,
-    env: { DATABASE_URL: E2E_DB, APP_URL: `http://localhost:${PORT}`, NODE_ENV: "production" },
+    env: { DATABASE_URL: E2E_DB, APP_URL: `http://localhost:${PORT}`, NODE_ENV: "production", LOGIN_RATE_LIMIT: "1000" },
   },
 });

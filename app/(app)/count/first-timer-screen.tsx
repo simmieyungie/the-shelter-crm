@@ -68,7 +68,7 @@ export function FirstTimerScreen({ bootstrap, service, zone, identity, tally, on
           /* offline mid-way: save anyway */
         }
       }
-      await enqueueMemberCreate({ ...payload, allowDuplicatePhone: force }, `${payload.firstName} ${payload.lastName}`.trim());
+      await enqueueMemberCreate(bootstrap.userId, { ...payload, allowDuplicatePhone: force }, `${payload.firstName} ${payload.lastName}`.trim());
       await updateTally(identity, (t) => ({ registeredFirstTimers: t.registeredFirstTimers + 1 }));
       toast.success(`${payload.firstName} saved${online ? "" : " on this device"}`);
       setDupe(null);
@@ -82,7 +82,7 @@ export function FirstTimerScreen({ bootstrap, service, zone, identity, tally, on
   }
 
   async function markExisting(m: Match, then: "again" | "finish") {
-    await enqueueCheckin(service.eventId, m.id, `${m.firstName} ${m.lastName}`);
+    await enqueueCheckin(bootstrap.userId, service.eventId, m.id, `${m.firstName} ${m.lastName}`);
     await updateTally(identity, (t) => ({ registeredFirstTimers: t.registeredFirstTimers + 1 }));
     toast.success(`${m.firstName} marked present`);
     setDupe(null);

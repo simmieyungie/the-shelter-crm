@@ -11,13 +11,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logout, switchParish } from "@/lib/auth/actions";
+import { offlineDb } from "@/lib/offline/db";
+
+async function beforeSignOut(e: React.FormEvent<HTMLFormElement>, userId: string) {
+  // Unsent counts stay on this phone under this user and send next time they sign in.
+  const pending = await offlineDb().outbox.where("[userId+status]").equals([userId, "pending"]).count();
+  if (pending > 0 && !window.confirm(`${pending} item${pending === 1 ? " hasn't" : "s haven't"} been sent yet. They stay on this phone and send when you sign in again. Sign out now?`)) {
+    return false;
+  }
+  navigator.serviceWorker?.controller?.postMessage({ type: "clear-page-caches" });
+  e.currentTarget.requestSubmit();
+  return true;
+}
 
 export function AccountMenu({
+  userId,
   name,
   parishes,
   currentParishId,
   showAdmin,
 }: {
+  userId: string;
   name: string;
   parishes: { id: string; name: string }[];
   currentParishId: string | null;
@@ -68,7 +82,17 @@ export function AccountMenu({
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <form action={logout} className="w-full">
+          <form
+            action={logout}
+            className="w-full"
+            onSubmit={(e) => {
+              if (e.nativeEvent instanceof SubmitEvent && e.nativeEvent.submitter) {
+                e.preventDefault();
+                const form = e.currentTarget;
+                void beforeSignOut({ currentTarget: form } as React.FormEvent<HTMLFormElement>, userId);
+              }
+            }}
+          >
             <button type="submit" className="flex w-full items-center gap-2 text-left">
               <LogOut className="size-4" aria-hidden /> Sign out
             </button>

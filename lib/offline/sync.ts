@@ -22,6 +22,7 @@ export function subscribeSyncState(l: Listener) {
 }
 
 let inFlight: Promise<void> | null = null;
+let currentUserId: string | null = null;
 let again = false;
 
 /** Sends every due outbox item. Safe to call often; concurrent calls coalesce. */
@@ -45,12 +46,13 @@ export function syncNow(): Promise<void> {
 
 async function drain() {
   if (typeof navigator !== "undefined" && !navigator.onLine) return;
+  if (!currentUserId) return;
   const db = offlineDb();
   for (;;) {
     const now = Date.now();
     const due = await db.outbox
-      .where("status")
-      .equals("pending")
+      .where("[userId+status]")
+      .equals([currentUserId, "pending"])
       .filter((i) => i.nextAttemptAt <= now)
       .limit(BATCH)
       .toArray();
@@ -130,7 +132,8 @@ async function applyResults(items: OutboxItem[], sentVersions: Map<number, numbe
 
 let started = false;
 /** Starts the background loop: online event, every 15 s, nudges, and service-worker messages. */
-export function startSyncLoop() {
+export function startSyncLoop(userId: string) {
+  currentUserId = userId;
   if (started || typeof window === "undefined") return () => undefined;
   started = true;
   const kick = () => void syncNow();
@@ -148,6 +151,7 @@ export function startSyncLoop() {
   kick();
   return () => {
     started = false;
+    currentUserId = null;
     setSyncNudge(null);
     window.removeEventListener("online", kick);
     clearInterval(interval);

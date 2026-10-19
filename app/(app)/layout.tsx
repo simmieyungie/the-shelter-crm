@@ -23,8 +23,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </p>
           <p className="truncate text-xs text-white/70">{place}</p>
         </div>
-        <SyncPill />
-        <AccountMenu name={user.name} parishes={parishes} currentParishId={parish?.id ?? null} showAdmin={showAdmin} />
+        <SyncPill userId={user.id} />
+        <AccountMenu userId={user.id} name={user.name} parishes={parishes} currentParishId={parish?.id ?? null} showAdmin={showAdmin} />
       </header>
 
       {/* Phone app bar */}
@@ -35,8 +35,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </p>
           <p className="truncate text-xs text-white/70">{parish?.name ?? place}</p>
         </div>
-        <SyncPill />
-        <AccountMenu name={user.name} parishes={parishes} currentParishId={parish?.id ?? null} showAdmin={showAdmin} />
+        <SyncPill userId={user.id} />
+        <AccountMenu userId={user.id} name={user.name} parishes={parishes} currentParishId={parish?.id ?? null} showAdmin={showAdmin} />
       </header>
 
       <div className="md:flex">

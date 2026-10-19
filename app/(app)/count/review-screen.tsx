@@ -8,9 +8,9 @@ import { offlineDb } from "@/lib/offline/db";
 import { syncNow } from "@/lib/offline/sync";
 import { serviceLabel, type ScreenProps } from "./count-types";
 
-export function ReviewScreen({ service, zone, tally, online, go }: ScreenProps) {
+export function ReviewScreen({ bootstrap, service, zone, tally, online, go }: ScreenProps) {
   const [submitted, setSubmitted] = useState(false);
-  const waiting = useLiveQuery(() => offlineDb().outbox.where("status").equals("pending").count(), [], 0);
+  const waiting = useLiveQuery(() => offlineDb().outbox.where("[userId+status]").equals([bootstrap.userId, "pending"]).count(), [], 0);
   const rows: [string, number][] = [
     ["Men", tally?.men ?? 0],
     ["Women", tally?.women ?? 0],

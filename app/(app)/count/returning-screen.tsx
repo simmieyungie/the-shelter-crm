@@ -40,7 +40,7 @@ export function ReturningScreen({ bootstrap, service, online, go }: ScreenProps)
   }, [q, online, bootstrap.parishId]);
 
   async function mark(r: Result) {
-    await enqueueCheckin(service.eventId, r.id, `${r.firstName} ${r.lastName}`);
+    await enqueueCheckin(bootstrap.userId, service.eventId, r.id, `${r.firstName} ${r.lastName}`);
     setMarked((m) => new Set(m).add(r.id));
     toast.success(`${r.firstName} marked present`);
   }

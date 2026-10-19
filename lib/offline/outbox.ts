@@ -52,7 +52,7 @@ export async function updateTally(id: TallyIdentity, mutate: (t: LocalTally) => 
     if (existing) {
       await db.outbox.update(existing.seq!, { payload, version: existing.version + 1, nextAttemptAt: Date.now(), attempts: 0 });
     } else {
-      await db.outbox.add(newItem("tally.upsert", next.clientId, next.key, payload));
+      await db.outbox.add(newItem(next.userId, "tally.upsert", next.clientId, next.key, payload));
     }
   });
   requestSync();
@@ -69,25 +69,26 @@ export async function restoreTally(id: TallyIdentity, server: Counts & { clientI
   });
 }
 
-export async function enqueueMemberCreate(payload: MemberCreatePayload, label: string) {
+export async function enqueueMemberCreate(userId: string, payload: MemberCreatePayload, label: string) {
   const clientId = uuid();
-  await offlineDb().outbox.add({ ...newItem("member.create", clientId, `member:${clientId}`, payload), label });
+  await offlineDb().outbox.add({ ...newItem(userId, "member.create", clientId, `member:${clientId}`, payload), label });
   requestSync();
   return clientId;
 }
 
-export async function enqueueCheckin(serviceEventId: string, memberId: string, label: string) {
+export async function enqueueCheckin(userId: string, serviceEventId: string, memberId: string, label: string) {
   const clientId = uuid();
   await offlineDb().outbox.add({
-    ...newItem("checkin.create", clientId, `checkin:${serviceEventId}:${memberId}`, { serviceEventId, memberId }),
+    ...newItem(userId, "checkin.create", clientId, `checkin:${serviceEventId}:${memberId}`, { serviceEventId, memberId }),
     label,
   });
   requestSync();
   return clientId;
 }
 
-function newItem(kind: SyncKind, clientId: string, key: string, payload: unknown): OutboxItem {
+function newItem(userId: string, kind: SyncKind, clientId: string, key: string, payload: unknown): OutboxItem {
   return {
+    userId,
     clientId,
     kind,
     key,

@@ -9,6 +9,7 @@ test.describe("spreadsheet import wizard", () => {
   test("upload, match, review, import and undo", async ({ page }) => {
     await login(page, "secretary@example.com");
     await page.goto("/reports/import");
+    await page.waitForLoadState("networkidle"); // let the page hydrate before choosing a file
     await page.getByLabel("Spreadsheet file").setInputFiles("tests/fixtures/imports/messy-register.xlsx");
     // Two sheets: pick the register.
     await page.getByRole("radio", { name: /2026/ }).check();
