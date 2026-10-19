@@ -89,3 +89,14 @@ Status key: **Open** means I picked a default but would like your answer. **Sett
 
 ### 24. Undoing an import when someone has since attached things to those services.
 **Open.** **Decided:** undo always removes the imported reports. It removes the service itself only if nothing else hangs off it, such as tallies, check-ins or tasks. If any imported report was edited after the import, the app lists those and asks again before removing them.
+
+## Tasks
+
+### 25. Who can see which tasks?
+**Open.** **Decided:** the Parish Pastor sees every task in the parish. A Head of Department sees their department's tasks. Everyone else sees the tasks given to them or created by them. First-timer follow-up calls appear under "First-timer follow-up".
+
+### 26. Who can move a task between columns?
+**Open.** **Decided:** the person it's assigned to, their HOD and the Pastor. Only the HOD or Pastor can cancel a task. Finished tasks drop off the board 14 days after they're done.
+
+### 27. Can an HOD give a task to someone outside their department?
+**Open.** **Decided:** no, as the spec says. They can assign themselves or active members of their department who have an account. The Pastor can assign anyone in the parish.
