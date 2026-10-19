@@ -47,7 +47,9 @@ export const PERMS = {
   runImport: ["SECRETARY", "HEAD_USHER", "PARISH_PASTOR"],
   verifyAtImport: ["PARISH_PASTOR"],
   manageAllTasks: ["PARISH_PASTOR"],
-  viewMembers: ["HEAD_USHER", "SECRETARY", "HOD", "TRIBE_LEADER", "PARISH_PASTOR", "USHER"],
+  viewMembers: ["HEAD_USHER", "SECRETARY", "HOD", "TRIBE_LEADER", "PARISH_PASTOR"],
+  // Ushers can find a returning guest and mark them present, without browsing member records.
+  recordAttendance: ["USHER", "HEAD_USHER", "SECRETARY", "HOD", "TRIBE_LEADER", "PARISH_PASTOR"],
   editMembers: ["HEAD_USHER", "SECRETARY", "PARISH_PASTOR"],
   adminParish: ["PARISH_PASTOR"],
   zoneOverview: ["AREA_PASTOR", "ZONAL_PASTOR", "PROVINCIAL_ADMIN", "SYSTEM_ADMIN"],

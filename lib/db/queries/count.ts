@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
-import { assertCan, assertParish, can } from "@/lib/auth/permissions";
+import { assertCan, can } from "@/lib/auth/permissions";
 import type { Access } from "@/lib/auth/scope";
 import { addDays, todayIso } from "@/lib/dates";
 import { type DbOrTx, db } from "@/lib/db";
@@ -161,7 +161,7 @@ export async function zoneTotalsFor(tx: DbOrTx, eventIds: string[], excludeUserI
 
 /** Members a usher can mark present: search by name or phone within the parish. */
 export async function searchMembersForCheckin(access: Access, parishId: string, q: string) {
-  assertParish(access, parishId);
+  assertCan(access, "recordAttendance", parishId);
   const term = q.trim().toLowerCase();
   if (term.length < 2) return [];
   const digits = term.replace(/\D/g, "");

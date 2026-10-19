@@ -29,7 +29,7 @@ test.describe("app shell", () => {
   test("navigation is filtered by role", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "Checked once on desktop.");
     await login(page, "usher1@example.com");
-    await expect(page.getByTestId("side-nav").getByRole("link")).toHaveText(["Count", "Tasks", "Members"]);
+    await expect(page.getByTestId("side-nav").getByRole("link")).toHaveText(["Count", "Tasks"]);
     await page.getByRole("button", { name: "Account menu" }).click();
     await page.getByRole("button", { name: "Sign out" }).click();
     await login(page, "zonalpastor@example.com");

@@ -155,7 +155,7 @@ async function applyMemberCreate(tx: Tx, access: Access, userId: string, clientI
 
 async function applyCheckin(tx: Tx, access: Access, userId: string, serviceEventId: string, memberId: string) {
   const ev = await loadEvent(tx, serviceEventId);
-  if (!can(access, "viewMembers", ev.parishId)) throw new Rejected("You can't record attendance in this parish.");
+  if (!can(access, "recordAttendance", ev.parishId)) throw new Rejected("You can't record attendance in this parish.");
   const [m] = await tx.select({ parishId: s.members.parishId }).from(s.members).where(eq(s.members.id, memberId));
   if (!m || m.parishId !== ev.parishId) throw new Rejected("That person isn't in this parish.");
   const rows = await tx

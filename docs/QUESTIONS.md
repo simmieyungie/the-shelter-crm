@@ -117,3 +117,20 @@ Status key: **Open** means I picked a default but would like your answer. **Sett
 
 ### 32. What does "absent" mean on the workers tile?
 **Open.** **Decided:** ushers on the roster for a service in the period, up to yesterday, who never sent a count.
+
+## Members and follow-up
+
+### 33. Should ushers see the member directory?
+**Open.** **Decided:** no. Ushers can search for a returning guest and mark them present, but they don't get the Members tab or member profiles. The Members tab is for the Head Usher, Secretary, HODs, Tribe Leaders and the Pastor. Only the Secretary, Head Usher and Pastor can edit records.
+
+### 34. Which tribe gets the Day-7 invite?
+**Open.** **Decided:** the tribe the usher picked when registering them. If none was picked, the parish's first active tribe is used. We don't have locations to work out the truly nearest one yet.
+
+### 35. What happens on Day 30 to someone who came fewer than 3 times?
+**Open.** **Decided:** they stay a "First-timer" and the Pastor gets a "Pastoral follow-up" task saying how many times they came. Nothing else is sent automatically.
+
+### 36. When should automatic messages go out?
+**Open.** **Decided:** the welcome is queued for 15:00 on the day of the visit. The other invites go out when the 06:00 daily job runs. In v1 nothing is really sent: messages are logged and marked "sent" until an SMS/WhatsApp provider is chosen.
+
+### 37. Merging duplicate people
+**Open.** **Decided:** the Secretary, Head Usher or Pastor can merge two records that share a phone number from either profile. Attendance, milestones, tribes, departments, tasks and messages move to the kept record, which keeps the earliest first visit. The merge is recorded in the audit log.
