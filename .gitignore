@@ -10,3 +10,7 @@ test-results/
 *.log
 public/sw.js
 public/swe-worker-*.js
+next-env.d.ts
+*.tsbuildinfo
+/blob-report/
+/playwright/.cache/

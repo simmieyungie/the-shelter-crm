@@ -1,0 +1,4 @@
+drizzle/
+pnpm-lock.yaml
+public/sw.js
+components/ui/
