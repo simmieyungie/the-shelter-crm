@@ -2,6 +2,16 @@
 
 These are questions about how the church works, not about technology. For each one I made the most sensible choice so the build could keep moving. Read the **Decided** line and tell me if anything should change. Most of these are quick to adjust.
 
+## Check these first
+
+These five change the numbers people see or what happens to real people, so they matter most:
+
+1. **Remittance split** (#7): the percentages are placeholders.
+2. **Spreadsheets with only a total** (#21): those services import with attendance unknown.
+3. **Returning first-timers** (#8): ushers must use "Mark a returning guest present", or retention will read low.
+4. **Report deadline** (#29): reports are due by the end of Monday.
+5. **"Overall" scoring** (#30): this decides who shows as "Follow up" on the zone overview.
+
 Status key: **Open** means I picked a default but would like your answer. **Settled** means you have already answered.
 
 ---
