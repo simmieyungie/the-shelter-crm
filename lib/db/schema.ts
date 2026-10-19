@@ -402,6 +402,9 @@ export type ImportOptions = {
   defaultServiceTypeId?: string | null;
   afterImportStatus?: "SUBMITTED" | "VERIFIED";
   serviceNameMap?: Record<string, string | "skip">; // spreadsheet name -> service_type id
+  confidence?: Record<string, "high" | "low" | "none">; // auto-match confidence per column
+  summary?: { READY: number; NEEDS_FIX: number; DUPLICATE: number; SKIPPED: number };
+  result?: { imported: number; firstDate: string | null; lastDate: string | null; createdEvents: number };
 };
 
 export const importBatches = pgTable(

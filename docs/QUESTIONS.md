@@ -75,3 +75,17 @@ Status key: **Open** means I picked a default but would like your answer. **Sett
 
 ### 20. When does a report count as "sent to the Area office"?
 **Open.** **Decided:** as soon as the Pastor verifies it. There is no separate sending step, and only verified reports count in Area and Zone totals.
+
+## Importing past services
+
+### 21. Our old spreadsheets only have a total, not men/women/children. What happens?
+**Open.** **Decided for now:** reports store attendance as men, women and children, so a total on its own imports as "attendance unknown". The total column is only used to check the other numbers. If many parishes only kept totals, I can add a "total only" attendance field. Please tell me.
+
+### 22. A row's date isn't the usual day for that service, for example Accelerate on a Wednesday.
+**Open.** **Decided:** as the spec says, the person importing chooses between "use the nearest service date" and "skip the row". If special midweek services are common, a third option "keep the date as it is" is easy to add.
+
+### 23. Two rows in a spreadsheet have the same service on the same date.
+**Open.** **Decided:** if the service is allowed to run twice that day, both are imported as the 1st and 2nd runs, ordered by a time column if there is one, otherwise by row order. If it isn't allowed, the extra row must be skipped. The person importing confirms each one.
+
+### 24. Undoing an import when someone has since attached things to those services.
+**Open.** **Decided:** undo always removes the imported reports. It removes the service itself only if nothing else hangs off it, such as tallies, check-ins or tasks. If any imported report was edited after the import, the app lists those and asks again before removing them.
