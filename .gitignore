@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+.env
+.env*.local
+.DS_Store
+*.log
+public/sw.js
+public/swe-worker-*.js
