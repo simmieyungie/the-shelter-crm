@@ -61,3 +61,17 @@ Status key: **Open** means I picked a default but would like your answer. **Sett
 
 ### 16. Who can add an extra or special service on the day?
 **Open.** **Decided:** the Head Usher or Parish Pastor, from the Count screen. A service can only run more times in one day than its parish setting allows if someone raises that setting first.
+
+## Service reports
+
+### 17. Can the Parish Pastor edit and submit a report, or only verify it?
+**Open.** **Decided:** the Pastor can also fill in and submit reports, for example a past service they are entering themselves. The Head Usher and Secretary can do the same. Only the Pastor can verify.
+
+### 18. Can the Pastor send a submitted report back for changes?
+**Open.** **Decided:** yes, with "Send back for changes". It returns to Draft so the Head Usher can fix it and submit again.
+
+### 19. Can the Head Usher override the usher tallies?
+**Open.** **Decided:** yes, with "Type the numbers instead". From then on the report uses the typed numbers and new tallies no longer change it. The tallies are still kept and shown under "See tallies by zone".
+
+### 20. When does a report count as "sent to the Area office"?
+**Open.** **Decided:** as soon as the Pastor verifies it. There is no separate sending step, and only verified reports count in Area and Zone totals.
